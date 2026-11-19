@@ -1,6 +1,6 @@
 # ROADMAP: Gauge
 
-Last updated: 2026-11-09T14:40Z (update Drips Wave 11 submission packet and sibling comparison)
+Last updated: 2026-11-19T00:00Z (reject malformed and duplicate registry rule IDs, 7.6)
 Roadmap version: 3
 
 This file is the single source of truth for remaining work. It is read before every task and updated after every change.
@@ -40,7 +40,7 @@ The repository is 100% ready when every task in Phases 0 to 6 is done and every 
 | 4 | Dogfood and release v0.1.0 | 2 | 9 | 22% |
 | 5 | v0.2 features | 3 | 11 | 27% |
 | 6 | Release v0.2.0 and community | 0 | 5 | 0% |
-| 7 (backlog) | Backlog | 0 | 4 | 0% |
+| 7 (backlog) | Backlog | 1 | 5 | 20% |
 | **Phases 0 to 6** | **Readiness total** | **56** | **79** | **70%** |
 | Gates | G1 to G10 | 3 | 10 | 30% |
 <!-- PROGRESS:END -->
@@ -226,6 +226,7 @@ Constraint on the two remaining experimental tasks: Gauge never builds or submit
 - [ ] **7.2** Claimable balances, liquidity pool shares and sponsorship analysis.
 - [ ] **7.3** Alert integrations (probably never; JSON and CI cover it).
 - [ ] **7.4** Cross-check issued assets against `stellar.toml` currencies.
+- [x] **7.6** Reject duplicate or malformed rule IDs in the registry: `TestRegistryIDs` asserts `All()` holds exactly sixteen IDs, each unique and matching `^(acct|sig|thr|flag|id|src)-[a-z0-9]+(-[a-z0-9]+)*$`. S. Deps: 3.1. Done when: `go test ./internal/rules -run TestRegistryIDs -race -count=1` passes, and a duplicate or camelCase ID makes it fail. (done 2026-11-19: `internal/rules/registry_ids_test.go` reads the shipped strings through `All()` and checks the count, uniqueness and shape, with the six allowed prefixes held in one table so a new family is a one-line change. Proven against a scratch tree: adding a second `sig-hashx` entry failed with `rule 1 repeats ID "sig-hashx", first seen at rule 0`, and renaming `flag-drift` to `flagDrift` failed with `rule 11 ID "flagDrift" does not match ^(acct|sig|thr|flag|id|src)-[a-z0-9]+(-[a-z0-9]+)*$`. Both edits were reverted, so the registry and every shipped ID are unchanged.)
 
 ## 6. Dependency map (critical path)
 
@@ -276,6 +277,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-19 | Task 7.6 adds `internal/rules/registry_ids_test.go`, which reads the sixteen IDs through `All()` and pins their count, uniqueness and shape. The six prefixes CONTRIBUTING.md allows live in one table, so the shape checks fail on a duplicate, an underscore, uppercase or a doubled dash. A temporary duplicate `sig-hashx` and a temporary `flagDrift` each made it fail; both were reverted, so no registry line changed. `scripts/generate_issues.sh` gains the 7.6 backlog row. | 7.6 |
 | 2026-11-09 | Updated Drips Wave submission packet (docs/WAVE_SUBMISSION.md) for Wave 11: confirmed 200 unit tests passing, all 16 rules registered, OpenSSF Scorecard at 6.8 with live badge, live documentation site at https://posture-sec.github.io/guage/, dynamic README metric sync, and updated sibling comparison data across org repositories. | none ticked |
 | 2026-11-09 | Finalized project naming by removing all occurrences of "working name" across repository documentation, PRD, architecture, and roadmap files. Implemented dynamic README metrics synchronization (`scripts/sync_readme.py`) generating live Shields.io endpoint JSON files under `site/data/` for 200 tests and 16 rules, and enforced with `--check` in the `roadmap-check` workflow. | none ticked |
 | 2026-11-09 | Add Docs Live badge to README and prominent navigation links to the 7-page live documentation site. | none ticked |
