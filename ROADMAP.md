@@ -1,6 +1,6 @@
 # ROADMAP: Gauge
 
-Last updated: 2026-11-19T20:25Z (tasks 7.20 to 7.22, strict threshold decode, concurrency bounds and hostname sentinels)
+Last updated: 2026-11-20T10:24Z (verify rule registry ID uniqueness and shape, 7.23)
 Roadmap version: 3
 
 This file is the single source of truth for remaining work. It is read before every task and updated after every change.
@@ -40,7 +40,7 @@ The repository is 100% ready when every task in Phases 0 to 6 is done and every 
 | 4 | Dogfood and release v0.1.0 | 2 | 9 | 22% |
 | 5 | v0.2 features | 3 | 11 | 27% |
 | 6 | Release v0.2.0 and community | 0 | 5 | 0% |
-| 7 (backlog) | Backlog | 10 | 14 | 71% |
+| 7 (backlog) | Backlog | 11 | 15 | 73% |
 | **Phases 0 to 6** | **Readiness total** | **56** | **79** | **70%** |
 | Gates | G1 to G10 | 3 | 10 | 30% |
 <!-- PROGRESS:END -->
@@ -236,6 +236,7 @@ Constraint on the two remaining experimental tasks: Gauge never builds or submit
 - [x] **7.20** test(source): fail the read when a threshold tier is null or absent. S. Deps: none. Done when: `internal/source/threshold_decode_test.go` tables null per tier, a string tier, a float tier, and thresholds as null, an array or absent; every refusal asserts `errors.Is(err, ErrDecode)`, no successful read carries a zero threshold, and 0, 255, 256 pin the range check at `internal/source/horizon.go:111`. (done 2026-11-19: added `internal/source/threshold_decode_test.go`; issue #145.)
 - [x] **7.21** security(source): bound in-flight requests and stop retries on cancel. M. Deps: none. Done when: `internal/source/concurrency_test.go` starts twelve Account calls with MaxConcurrent: 2 against a blocking server and asserts peak in-flight is 2, never 3; a second test answers 429 with Retry-After: 1, injects a sleep that signals on entry, cancels, and asserts the call returns and no sleep outlives it; a runtime.NumGoroutine baseline shows no leak; both tests run under -race. (done 2026-11-19: added `internal/source/concurrency_test.go`; issue #146.)
 - [x] **7.22** test(sep1): reject malformed hostnames before any dial. S. Deps: none. Done when: `internal/sep1/hostname_test.go` tables a single label, an empty label, a 64-character label, a trailing hyphen, a port, userinfo, a path, an IPv4 literal, a bracketed IPv6 literal and a 254-character name; each row asserts `errors.Is` against one of the six sentinels, and that the error contains neither the input nor a label from it, at every length. (done 2026-11-19: added `internal/sep1/hostname_test.go`; issue #147.)
+- [x] **7.23** Reject duplicate or malformed rule IDs in the registry. S. Deps: 3.1. Done when: `internal/rules/registry_ids_test.go` reads all sixteen IDs through `All()`, asserts each is unique and matches `^(acct|sig|thr|flag|id|src)-[a-z0-9]+(-[a-z0-9]+)*$`, and fails for a duplicate or camelCase ID. (done 2026-11-20: `TestRegistryIDs` checks the count, uniqueness and allowed shape while leaving the rule registry and shipped IDs unchanged; duplicate and camelCase mutations were each shown to fail in isolation.)
 
 ## 6. Dependency map (critical path)
 
@@ -286,6 +287,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-20 | Task 7.23 adds `internal/rules/registry_ids_test.go` to check the registry's sixteen IDs for uniqueness and the six allowed lowercase kebab-case families. The test reads IDs through `All()` and rejects duplicates and malformed IDs without changing the registry or any shipped ID. Added its backlog row and regenerated the README test-count metric and badge endpoint. | 7.23 |
 | 2026-11-19 | Close #145, #146 and #147. Added strict threshold decoding test table in `internal/source/threshold_decode_test.go`. Added bounded concurrency (12 callers, MaxConcurrent: 2) and 429 cancellation tests in `internal/source/concurrency_test.go`. Added echo-free sentinel mapping table test in `internal/sep1/hostname_test.go`. | 7.20, 7.21, 7.22 |
 | 2026-11-19 | Tasks 7.5 to 7.7: added policy declaration coverage in `internal/policy`. Folded issuer role predicates onto one trait table, added load boundary coverage test for `gauge.example.toml`, and recorded that the loader accepts out-of-order declared thresholds. | 7.5, 7.6, 7.7 |
 | 2026-11-19 | Tasks 7.14 to 7.16: added golden-free contract tests in `internal/report`. `limits_test.go` pins the limits footer as the last text line, after `exit code:`, and as a single top-level JSON key. `empty_test.go` pins the empty report in both formats, with `accounts` as `[]` and not `null`. `nil_facts_test.go` pins nil and empty fact blocks: findings still print, no fact line is invented, and JSON omits `facts`. Each test was shown to fail against a deliberately broken renderer. No production code changed. Backlog rows added to `scripts/generate_issues.sh`; `project_structure.md` lists the new files. | 7.14, 7.15, 7.16 |
