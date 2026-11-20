@@ -1,6 +1,6 @@
 # ROADMAP: Gauge
 
-Last updated: 2026-11-20T10:42Z (add registry ID contract test, 7.36)
+Last updated: 2026-11-20T10:54Z (align registry ID PR with generated metrics policy, 7.36)
 Roadmap version: 3
 
 This file is the single source of truth for remaining work. It is read before every task and updated after every change.
@@ -301,7 +301,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
-| 2026-11-20 | Task 7.36 adds `internal/rules/registry_ids_test.go` to check the registry's sixteen IDs for uniqueness and the six allowed lowercase kebab-case families. The test reads IDs through `All()` and rejects duplicates and malformed IDs without changing the registry or any shipped ID. Added its backlog row and regenerated the README test-count metric and badge endpoint. | 7.36 |
+| 2026-11-20 | Task 7.36 adds `internal/rules/registry_ids_test.go` to check the registry's sixteen IDs for uniqueness and the six allowed lowercase kebab-case families. The test reads IDs through `All()` and rejects duplicates and malformed IDs without changing the registry or any shipped ID. Added its backlog row; generated README metrics are left unchanged and refresh on the default branch. | 7.36 |
 | 2026-11-20 | Task 5.3: added `report.Markdown` and `--format markdown` on `check` and `audit`. Every chain value passes through `sanitize.Markdown` and evidence through `sanitize.Fenced`. The sample and all eighteen Appendix B scenarios gain a markdown golden. Closes #55. | 5.3 |
 | 2026-11-20 | Close #178, #179 and #180 with three test-only contracts in `internal/rules`. `purity_test.go` proves `Evaluate`, `Facts` and every rule leave a deep-copied `Context` unchanged and that a second `Evaluate` is identical. `finding_ruleid_test.go` fires every registered rule and holds each finding's `RuleID` to its registry ID, failing on a missing row or a phantom ID. `arithmetic_guard_test.go` parses the package with `go/ast` and fails on a weight sum, a `20` cap or a `Weight` compared with 0 outside three allowlisted functions, and pins the three delegating call sites. Each was shown failing against a deliberate break. #180 asked for ID 7.10, which was already taken, so it is 7.32. Backlog rows added to `scripts/generate_issues.sh`; `project_structure.md` lists the new files. No production code changed. | 7.8, 7.9, 7.32 |
 | 2026-11-19 | Close #133, #134 and #135. `Severity.Valid` plus a marshal guard and a rank keep an out-of-range severity from sorting above high or entering a report as `"unknown"`. Added wire tests pinning AccountFacts null against zero and the AccountSnapshot sequence as a JSON string; neither of those two changed production code. Backlog rows added to `scripts/generate_issues.sh`; `project_structure.md` lists the three new test files. | 7.26, 7.27, 7.28 |
