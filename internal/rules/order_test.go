@@ -15,8 +15,6 @@ const (
 	secondHashXKey = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 )
 
-func intPointer(v int) *int { return &v }
-
 // TestRegistryEvaluationOrder pins the pre-sort sequence Evaluate hands to the
 // report layer. Findings are appended in registry order and sorted only when a
 // report is prepared, so the order below is a contract nothing else names: a
